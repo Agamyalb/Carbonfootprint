@@ -31,7 +31,6 @@ class EcoScoreModel(nn.Module):
 
 # Load Trained Model
 model = EcoScoreModel()
-model.load_state_dict(torch.load("eco_score_model.pth"))  # 🔴 Load your trained model
 model.eval()
 
 # Function to predict Eco Score
@@ -41,7 +40,8 @@ def predict_eco_score(material, carbon_footprint, recyclable):
     input_tensor = torch.tensor([[material_encoded, carbon_footprint, recyclable_encoded]], dtype=torch.float32)
 
     with torch.no_grad():
-        score = model(input_tensor).item()
+        #score = model(input_tensor).item()
+        score = 50.0  # temporary dummy value
 
     return round(score, 2)
 
