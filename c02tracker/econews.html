@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eco-News Feed</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.3/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-green-50 min-h-screen flex flex-col">
+  <header class="bg-white p-4 shadow-md text-center">
+    <h1 class="text-2xl font-bold text-green-700">Latest Eco-News</h1>
+  </header>
+
+  <main class="p-4 flex-grow">
+    <div class="bg-white shadow-md rounded p-6 text-center">
+      <h2 class="text-xl font-bold mb-4">Submit Your Eco-News</h2>
+      <form id="newsForm" class="space-y-4">
+        <input type="text" id="newsTitle" placeholder="News Title" class="w-full p-2 border rounded" required>
+        <input type="text" id="newsSource" placeholder="Source (e.g., BBC, Reuters)" class="w-full p-2 border rounded" required>
+        <input type="url" id="newsLink" placeholder="Article URL" class="w-full p-2 border rounded" required>
+        <button type="submit" class="bg-green-600 text-white p-2 rounded w-full">Submit News</button>
+      </form>
+    </div>
+
+    <div class="mt-6">
+      <h2 class="text-xl font-bold text-center mb-4">News Articles</h2>
+      <div id="news-container" class="space-y-4">
+        <!-- News articles will be injected here -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-white p-4 shadow-md text-center">
+    <p class="text-sm text-gray-600">&copy; 2025 CarbonWise by CODECRAFTERS</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const newsContainer = document.getElementById('news-container');
+      const newsForm = document.getElementById('newsForm');
+      const API_KEY = 'YOUR_NEWSAPI_KEY'; // Replace with your NewsAPI key
+      const url = `https://newsapi.org/v2/everything?q=environment&sortBy=publishedAt&apiKey=${API_KEY}`;
+
+      async function fetchNews() {
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data.articles) {
+            displayNews(data.articles.slice(0, 5));
+          }
+        } catch (error) {
+          newsContainer.innerHTML = '<p class="text-red-500 text-center">Failed to load news. Please try again later.</p>';
+        }
+      }
+
+      function loadUserNews() {
+        const savedNews = JSON.parse(localStorage.getItem('userNews')) || [];
+        displayNews(savedNews);
+      }
+
+      function displayNews(articles) {
+        newsContainer.innerHTML = '';
+        articles.forEach(article => {
+          const articleElement = document.createElement('div');
+          articleElement.classList.add('bg-white', 'p-4', 'rounded', 'shadow-md');
+          
+          articleElement.innerHTML = `
+            <h2 class="text-xl font-bold">
+              <a href="${article.link || article.url}" target="_blank" class="text-green-700 hover:underline">${article.title}</a>
+            </h2>
+            <p class="text-sm text-gray-600">${article.source.name || article.source} - ${new Date(article.publishedAt || article.date).toLocaleDateString()}</p>
+          `;
+
+          newsContainer.appendChild(articleElement);
+        });
+      }
+
+      newsForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const title = document.getElementById('newsTitle').value;
+        const source = document.getElementById('newsSource').value;
+        const link = document.getElementById('newsLink').value;
+        const date = new Date().toLocaleDateString();
+
+        const newArticle = { title, source, link, date };
+
+        let savedNews = JSON.parse(localStorage.getItem('userNews')) || [];
+        savedNews.unshift(newArticle);
+        localStorage.setItem('userNews', JSON.stringify(savedNews));
+
+        newsForm.reset();
+
+        loadUserNews();
+      });
+
+      fetchNews();
+      loadUserNews();
+    });
+  </script>
+</body>
+</html>
